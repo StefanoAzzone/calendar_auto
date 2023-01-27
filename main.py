@@ -1,34 +1,42 @@
 import os
-import pandas
+from calendar import Calendar, monthrange
 
-from ics import Calendar, Event
-
-
-def populate_file(calendar_name):
-    calendar_folder = 'C:\\Users\\user\\Downloads\\stefanoazzone98@gmail.com.ical\\'
-    matches = [elem for elem in os.listdir(calendar_folder) if elem.startswith(calendar_name) and
-               elem.endswith('.ics')]
-    assert len(matches) == 1
-    calendar_file_name = matches[0]
-    with open(calendar_folder + calendar_name + '_out.csv', 'w') as out_file:
-        with open(calendar_folder + calendar_file_name, 'r') as calendar_file:
-            cal = Calendar(calendar_file.read())
-            out_file.write(f'EVENT, DURATION\n')
-            for event in cal.events:
-                out_file.write(f'{event.name}, {event.duration.seconds/3600}\n')
-
-    df = pandas.read_csv(calendar_folder + calendar_name + '_out.csv')
-
-    df = df.sort_values('EVENT')
-
-    df = df.groupby(['EVENT']).sum()
-    print(df)
-
-
+from lib.backend import populate_file, map_calendar_name_to_path, get_hour_per_day_map, print_calendar_week_map
+from lib.configuration import parse_args, load_config
 
 if __name__ == '__main__':
+    config = load_config(f'{os.path.dirname(os.path.realpath(__file__))}\\config\\config.yaml')
 
-    populate_file("Ferrero")
+    calendar_folder = config["calendar_folder"]
+    calendar_names = config["calendar_names"]
+    # for calendar_name in ["Avvale", "Ferrero", "Stellantis", "Luxottica", "Eni"]:
+    #     populate_file(calendar_folder, calendar_name)
+
+    args = parse_args()
+
+    cal = Calendar()
+    weeks = cal.monthdayscalendar(year=int(args.year), month=int(args.month))
+    _, num_days = monthrange(year=int(args.year), month=int(args.month))
+    name_to_file_map = map_calendar_name_to_path(calendar_folder, calendar_names)
+
+    calendar_day_map = {}
+    for name, path in name_to_file_map.items():
+        calendar_day_map[name] = get_hour_per_day_map(path, num_days)
+
+    calendar_week_map = {}
+    for name in calendar_names:
+        hour_per_week_map = {}
+        for i, week in enumerate(weeks):
+            hour_per_week_map[i] = 0
+            for day in week:
+                if day != 0:
+                    hour_per_week_map[i] = hour_per_week_map[i] + calendar_day_map[name][day]
+
+        calendar_week_map[name] = hour_per_week_map
+
+    print_calendar_week_map(calendar_week_map, weeks)
+
+
 
 
 
