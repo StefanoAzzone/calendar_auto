@@ -44,7 +44,7 @@ def map_calendar_name_to_path(calendar_folder, calendar_names):
     return calendar_map
 
 
-def get_hour_per_day_map(path, num_days):
+def get_hour_per_day_map(path, num_days, year, month):
     hour_per_day_map = {}
     for day in range(1, num_days + 1):
         hour_per_day_map[day] = 0
@@ -53,11 +53,11 @@ def get_hour_per_day_map(path, num_days):
         cal = Calendar(calendar_file.read())
         for event in cal.events:
             begin = event.begin
-            day = int(begin.format('D'))
-            duration = event.duration
-            hour_per_day_map[day] = hour_per_day_map[day] + duration.seconds / 3600
+            if int(begin.format('YYYY')) == year and int(begin.format('MM')) == month:
+                day = int(begin.format('DD'))
+                duration = event.duration
+                hour_per_day_map[day] = hour_per_day_map[day] + duration.seconds / 3600
 
-    print(hour_per_day_map)
     return hour_per_day_map
 
 

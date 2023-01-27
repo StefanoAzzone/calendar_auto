@@ -13,15 +13,17 @@ if __name__ == '__main__':
     #     populate_file(calendar_folder, calendar_name)
 
     args = parse_args()
+    year = int(args.year)
+    month = int(args.month)
 
     cal = Calendar()
-    weeks = cal.monthdayscalendar(year=int(args.year), month=int(args.month))
-    _, num_days = monthrange(year=int(args.year), month=int(args.month))
+    weeks = cal.monthdayscalendar(year=year, month=month)
+    _, num_days = monthrange(year=year, month=month)
     name_to_file_map = map_calendar_name_to_path(calendar_folder, calendar_names)
 
     calendar_day_map = {}
     for name, path in name_to_file_map.items():
-        calendar_day_map[name] = get_hour_per_day_map(path, num_days)
+        calendar_day_map[name] = get_hour_per_day_map(path, num_days, year, month)
 
     calendar_week_map = {}
     for name in calendar_names:
