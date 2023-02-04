@@ -1,4 +1,5 @@
 import os
+from calendar import monthrange
 
 import pandas
 from ics import Calendar, Event
@@ -44,7 +45,9 @@ def map_calendar_name_to_path(calendar_folder, calendar_names):
     return calendar_map
 
 
-def get_hour_per_day_map(path, num_days, year, month):
+def get_hour_per_day_map(path, year, month):
+    _, num_days = monthrange(year=year, month=month)
+
     hour_per_day_map = {}
     for day in range(1, num_days + 1):
         hour_per_day_map[day] = 0
@@ -80,7 +83,7 @@ def get_week_beginning_and_end(week):
     return beginning, end
 
 
-def print_calendar_week_map(calendar_week_map, weeks):
+def print_calendar_week_map(calendar_week_map, weeks, scope):
     header = "Company,"
     for week in weeks:
         beginning, end = get_week_beginning_and_end(week)
@@ -89,8 +92,43 @@ def print_calendar_week_map(calendar_week_map, weeks):
     for name, week_map in calendar_week_map.items():
         row = name
         for i, hours in week_map.items():
-            row = row + ',' + str(hours)
+            if scope == "day":
+                row = row + ',' + str(hours/8)
+            elif scope == "hour":
+                row = row + ',' + str(hours)
         print(row)
+
+    print()
+
+
+def get_hour_per_project_map(path, year, month):
+    projects = []
+
+    hour_per_project_map = {}
+
+    with open(path, 'r') as calendar_file:
+        cal = Calendar(calendar_file.read())
+        for event in cal.events:
+            begin = event.begin
+            project = event.name
+            if int(begin.format('YYYY')) == year and int(begin.format('MM')) == month:
+                duration = event.duration
+                if project not in hour_per_project_map:
+                    hour_per_project_map[project] = duration.seconds / 3600
+                else:
+                    hour_per_project_map[project] = hour_per_project_map[project] + duration.seconds / 3600
+
+    return hour_per_project_map
+
+
+def print_calendar_project_map(calendar_project_map):
+    for company, project_map in calendar_project_map.items():
+        print(company.upper())
+        for project, duration in project_map.items():
+            print(f'{project},{duration}')
+        print()
+
+    print()
 
 
 

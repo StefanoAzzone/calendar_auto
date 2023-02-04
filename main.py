@@ -1,29 +1,46 @@
+import datetime
 import os
-from calendar import Calendar, monthrange
+from calendar import Calendar
+from os.path import expanduser
 
-from lib.backend import populate_file, map_calendar_name_to_path, get_hour_per_day_map, print_calendar_week_map
+
+from googleapiclient.discovery import build
+from googleapiclient.errors import HttpError
+
+from lib.authentication import authenticate
+from lib.backend import map_calendar_name_to_path, get_hour_per_day_map, print_calendar_week_map, \
+    get_hour_per_project_map, print_calendar_project_map
 from lib.configuration import parse_args, load_config
 
 if __name__ == '__main__':
-    config = load_config(f'{os.path.dirname(os.path.realpath(__file__))}\\config\\config.yaml')
+    home = expanduser("~")
+    config_folder = os.path.join(home, '.calendar_auto')
 
-    calendar_folder = config["calendar_folder"]
+    # creds = authenticate(config_folder)
+
+    config = load_config(os.path.join(config_folder, 'config.yaml'))
+
+    calendar_folder = os.path.join(config_folder, 'calendars')
     calendar_names = config["calendar_names"]
-    # for calendar_name in ["Avvale", "Ferrero", "Stellantis", "Luxottica", "Eni"]:
-    #     populate_file(calendar_folder, calendar_name)
 
     args = parse_args()
     year = int(args.year)
     month = int(args.month)
+    scope = args.scope
 
     cal = Calendar()
     weeks = cal.monthdayscalendar(year=year, month=month)
-    _, num_days = monthrange(year=year, month=month)
     name_to_file_map = map_calendar_name_to_path(calendar_folder, calendar_names)
 
     calendar_day_map = {}
     for name, path in name_to_file_map.items():
-        calendar_day_map[name] = get_hour_per_day_map(path, num_days, year, month)
+        calendar_day_map[name] = get_hour_per_day_map(path, year, month)
+
+    calendar_project_map = {}
+    for name, path in name_to_file_map.items():
+        calendar_project_map[name] = get_hour_per_project_map(path, year, month)
+
+    print(calendar_project_map)
 
     calendar_week_map = {}
     for name in calendar_names:
@@ -36,7 +53,8 @@ if __name__ == '__main__':
 
         calendar_week_map[name] = hour_per_week_map
 
-    print_calendar_week_map(calendar_week_map, weeks)
+    print_calendar_week_map(calendar_week_map, weeks, scope)
+    print_calendar_project_map(calendar_project_map)
 
 
 

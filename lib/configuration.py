@@ -1,5 +1,6 @@
 import argparse
 import os
+from datetime import datetime
 
 import yaml
 from yaml import Loader
@@ -18,9 +19,19 @@ def parse_args():
         description="Automate DevOps management"
     )
 
-    script_folder = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-    parser.add_argument('-year', help="The year", required=True)
-    parser.add_argument('-month', help="The month", required=True)
+    current_month = datetime.now().month
+    current_year = datetime.now().year
+
+    parser.add_argument('-year', default=current_year, help="The year")
+    parser.add_argument('-month', default=current_month, help="The month")
+    parser.add_argument('-scope',
+                        default='day',
+                        choices=['day', 'hour'],
+                        help='The time measure to return, either day or hour. Defaults to day.')
+    parser.add_argument('-view',
+                        choices=['week', 'project'],
+                        default='week',
+                        help='The view to create: either work time per week or work time per project. Defaults to week')
 
     args = parser.parse_args()
     return args

@@ -1,4 +1,6 @@
-calendar_folder: 'C:\\Users\\user\\Downloads\\stefanoazzone98@gmail.com.ical\\'
+# Example config:
+
+calendar_folder: 'C:\\Users\\user\\calendars'
 
 calendar_names:
   - Avvale
@@ -6,3 +8,6 @@ calendar_names:
   - Stellantis
   - Luxottica
   - Eni
+
+client_id: <xxx>
+client_key: <xxx>
