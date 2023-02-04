@@ -2,8 +2,8 @@ import os
 from calendar import monthrange
 
 import pandas
-from ics import Calendar, Event
-from datetime import datetime
+from ics import Calendar
+import re
 
 
 def populate_file(calendar_folder, calendar_name):
@@ -110,7 +110,7 @@ def get_hour_per_project_map(path, year, month):
         cal = Calendar(calendar_file.read())
         for event in cal.events:
             begin = event.begin
-            project = event.name
+            project = re.split(' - |- | -|-', event.name)[0]
             if int(begin.format('YYYY')) == year and int(begin.format('MM')) == month:
                 duration = event.duration
                 if project not in hour_per_project_map:
