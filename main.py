@@ -1,13 +1,8 @@
-import datetime
 import os
+import sys
 from calendar import Calendar
 from os.path import expanduser
 
-
-from googleapiclient.discovery import build
-from googleapiclient.errors import HttpError
-
-from lib.authentication import authenticate
 from lib.backend import map_calendar_name_to_path, get_hour_per_day_map, print_calendar_week_map, \
     get_hour_per_project_map, print_calendar_project_map
 from lib.configuration import parse_args, load_config
@@ -18,10 +13,12 @@ if __name__ == '__main__':
 
     # creds = authenticate(config_folder)
 
+    calendar_names = [x.split('_')[0] for x in os.listdir(os.path.join(config_folder, "calendars"))]
+    calendar_names.remove('stefanoazzone98@gmail.com.ics')
+
     config = load_config(os.path.join(config_folder, 'config.yaml'))
 
     calendar_folder = os.path.join(config_folder, 'calendars')
-    calendar_names = config["calendar_names"]
 
     args = parse_args()
     year = int(args.year)
