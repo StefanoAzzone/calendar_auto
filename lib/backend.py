@@ -110,13 +110,14 @@ def get_hour_per_project_map(path, year, month):
         cal = Calendar(calendar_file.read())
         for event in cal.events:
             begin = event.begin
-            project = re.split(' - |- | -|-', event.name)[0]
-            if int(begin.format('YYYY')) == year and int(begin.format('MM')) == month:
-                duration = event.duration
-                if project not in hour_per_project_map:
-                    hour_per_project_map[project] = duration.seconds / 3600
-                else:
-                    hour_per_project_map[project] = hour_per_project_map[project] + duration.seconds / 3600
+            if event.name is not None:
+                project = re.split(' - |- | -|-', event.name)[0]
+                if int(begin.format('YYYY')) == year and int(begin.format('MM')) == month:
+                    duration = event.duration
+                    if project not in hour_per_project_map:
+                        hour_per_project_map[project] = duration.seconds / 3600
+                    else:
+                        hour_per_project_map[project] = hour_per_project_map[project] + duration.seconds / 3600
 
     return hour_per_project_map
 
